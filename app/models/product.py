@@ -1,6 +1,7 @@
 from app.backend.db import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey
+from .category import Category
 
 
 class Product(Base):
