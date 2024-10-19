@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class CreateProduct(BaseModel):
@@ -9,3 +9,5 @@ class CreateProduct(BaseModel):
     stock: int
     category_id: int
     rating: float
+
+    model_config = ConfigDict(from_attributes=True, use_enum_values=True)
