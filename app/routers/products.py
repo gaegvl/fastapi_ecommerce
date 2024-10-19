@@ -1,8 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import insert, update, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql import and_
-from fastapi.encoders import jsonable_encoder
 from typing import Annotated
 from slugify import slugify
 
@@ -85,8 +83,8 @@ async def get_products_by_category(category_slug: Annotated[str, Depends(categor
     category = await db.scalar(select(Category).where(Category.slug==category_slug))
     category_ids: set[int] = set()
     category_ids = await get_all_category_ids(db, category.id, category_ids)
-    products = await db.scalars(select(Product).where(and_(Product.stock > 0, Product.is_active==True, Product.category_id.in_(category_ids))))
-    return [CreateProduct.from_orm(product) for product in products.all()]
+    products = await db.scalars(select(Product).where(Product.stock > 0, Product.is_active==True, Product.category_id.in_(category_ids)))
+    return [CreateProduct.model_validate(product) for product in products.all()]
 
 
 @router.get("/detail/{product_slug}")
@@ -99,7 +97,7 @@ async def update_product(product_slug: Annotated[str, Depends(product_by_slug)],
                          db: Annotated[AsyncSession, Depends(db.session_dependency)],
                          update_product: Annotated[CreateProduct, Depends(category_by_product)]):
     product: Product = product_slug
-    for field in update_product.__fields__:
+    for field in update_product.model_fields:
         setattr(product, field, update_product.__dict__[field])
     product.slug = slugify(update_product.name)
     await db.commit()
