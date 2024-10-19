@@ -1,3 +1,4 @@
+import uvicorn
 from fastapi import FastAPI
 from app.routers import category, products
 
@@ -9,3 +10,6 @@ async def welcome():
 
 app.include_router(category.router)
 app.include_router(products.router)
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8000)

@@ -15,7 +15,7 @@ class Database:
         self.engine = create_async_engine(URI)
         self.session_factory = async_sessionmaker(bind=self.engine, expire_on_commit=False, autoflush=False, autocommit=False)
 
-    async def sesion_dependency(self):
+    async def session_dependency(self):
         async with self.session_factory() as session:
             yield session
             await session.close()
