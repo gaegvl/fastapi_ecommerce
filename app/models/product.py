@@ -17,6 +17,7 @@ class Product(Base):
     rating: Mapped[float] = mapped_column()
     is_active: Mapped[bool] = mapped_column(default=True)
     category_id: Mapped[int] = mapped_column(ForeignKey('category.id'))
+    supplier_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=True)
 
     category: Mapped['Category'] = relationship('Category', back_populates='products', lazy='selectin')
 

@@ -83,7 +83,9 @@ async def get_products_by_category(category_slug: Annotated[str, Depends(categor
     category = await db.scalar(select(Category).where(Category.slug==category_slug))
     category_ids: set[int] = set()
     category_ids = await get_all_category_ids(db, category.id, category_ids)
-    products = await db.scalars(select(Product).where(Product.stock > 0, Product.is_active==True, Product.category_id.in_(category_ids)))
+    products = await db.scalars(select(Product).where(Product.stock > 0,
+                                                      Product.is_active==True,
+                                                      Product.category_id.in_(category_ids)))
     return [CreateProduct.model_validate(product) for product in products.all()]
 
 
