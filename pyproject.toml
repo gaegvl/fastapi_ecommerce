@@ -16,6 +16,10 @@ asyncpg = "^0.29.0"
 alembic = "^1.13.3"
 greenlet = "^3.1.1"
 python-slugify = "^8.0.4"
+passlib = "^1.7.4"
+bcrypt = "4.0.1"
+python-multipart = "^0.0.12"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 
 
 [build-system]
