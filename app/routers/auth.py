@@ -1,6 +1,3 @@
-from lib2to3.fixes.fix_next import is_subtree
-from math import expm1
-
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select, insert, update
@@ -73,10 +70,6 @@ async def get_current_user(token: Annotated[str,  Depends(oauth2_scheme)]):
         is_admin: str = payload.get('is_admin')
         is_supplier: str = payload.get('is_supplier')
         is_customer: str = payload.get('is_customer')
-
-        if username is None or user_id is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-
 
         return {'username': username,
                 'user_id': user_id,
