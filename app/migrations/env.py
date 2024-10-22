@@ -8,9 +8,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from app.backend.db import Base
-from app.models.category import Category
-from app.models.product import Product
-from app.models.users import User
+from app.models import category, product, users
 
 
 from alembic import context
