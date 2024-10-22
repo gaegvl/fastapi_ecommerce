@@ -21,4 +21,5 @@ class Product(Base):
 
     category: Mapped['Category'] = relationship('Category', back_populates='products', lazy='selectin')
 
+    feedback: Mapped[list['Feedback']] = relationship('Feedback', back_populates='product', lazy='selectin')
 
