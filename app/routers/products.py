@@ -8,6 +8,7 @@ from app.backend.db import Database
 from app.models.product import Product
 from app.models.category import Category
 from app.schemas.product import CreateProduct
+from .auth import get_current_user
 
 db = Database()
 router = APIRouter(prefix="/products", tags=["products"])
@@ -62,19 +63,25 @@ async def all_products(db: Annotated[AsyncSession, Depends(db.session_dependency
 
 @router.post("/create")
 async def create_products(db: Annotated[AsyncSession, Depends(db.session_dependency)],
-                          create_product: Annotated[CreateProduct, Depends(category_by_product)]):
-    await db.execute(insert(Product).values(name=create_product.name,
-                                            slug=slugify(create_product.name),
-                                            description=create_product.description,
-                                            price=create_product.price,
-                                            image_url=create_product.image_url,
-                                            stock=create_product.stock,
-                                            rating=create_product.rating,
-                                            category_id=create_product.category_id
-                                            ))
-    await db.commit()
-    return {'status_code': status.HTTP_200_OK,
-            'transaction': 'Success'}
+                          create_product: Annotated[CreateProduct, Depends(category_by_product)],
+                          current_user: Annotated[dict, Depends(get_current_user)]):
+    if current_user.get('is_admin') or current_user.get('is_supplier'):
+        await db.execute(insert(Product).values(name=create_product.name,
+                                                slug=slugify(create_product.name),
+                                                description=create_product.description,
+                                                price=create_product.price,
+                                                image_url=create_product.image_url,
+                                                stock=create_product.stock,
+                                                rating=create_product.rating,
+                                                category_id=create_product.category_id,
+                                                supplier_id = current_user.get('user_id')
+
+                                                ))
+        await db.commit()
+        return {'status_code': status.HTTP_200_OK,
+                'transaction': 'Success'}
+    else:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='You are not authorized to use this method')
 
 
 @router.get("/{category_slug}")
@@ -95,22 +102,28 @@ async def product_detail(product_slug: Annotated[str, Depends(product_by_slug)])
 
 
 @router.put("/detail/{product_slug}")
-async def update_product(product_slug: Annotated[str, Depends(product_by_slug)],
+async def update_product(product: Annotated[Product, Depends(product_by_slug)],
                          db: Annotated[AsyncSession, Depends(db.session_dependency)],
-                         update_product: Annotated[CreateProduct, Depends(category_by_product)]):
-    product: Product = product_slug
-    for field in update_product.model_fields:
-        setattr(product, field, update_product.__dict__[field])
-    product.slug = slugify(update_product.name)
-    await db.commit()
-    return {'status_code': status.HTTP_200_OK, 'transaction': 'Product updated successfully'}
+                         update_product: Annotated[CreateProduct, Depends(category_by_product)],
+                         current_user: Annotated[dict, Depends(get_current_user)]):
+    if current_user.get('is_admin') or (current_user.get('is_supplier') and current_user.get('id') == product.supplier_id):
+        for field in update_product.model_fields:
+            setattr(product, field, update_product.__dict__[field])
+        product.slug = slugify(update_product.name)
+        await db.commit()
+        return {'status_code': status.HTTP_200_OK, 'transaction': 'Product updated successfully'}
+    else:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='You are not authorized to use this method')
 
 
 @router.delete("/detail/{product_slug}")
-async def delete_product(product_slug: Annotated[str, Depends(product_by_slug)],
-                         db: Annotated[AsyncSession, Depends(db.session_dependency)]):
-    product: Product = product_slug
-    product.is_active = False
-    await db.commit()
+async def delete_product(product: Annotated[Product, Depends(product_by_slug)],
+                         db: Annotated[AsyncSession, Depends(db.session_dependency)],
+                         current_user: Annotated[dict, Depends(get_current_user)]):
+    if current_user.get('is_admin') or (current_user.get('is_supplier') and current_user.get('id') == product.supplier_id):
+        product.is_active = False
+        await db.commit()
 
-    return {'status_code': status.HTTP_200_OK, 'transaction': 'Product deleted successfully'}
+        return {'status_code': status.HTTP_200_OK, 'transaction': 'Product deleted successfully'}
+    else:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='You are not authorized to use this method')
