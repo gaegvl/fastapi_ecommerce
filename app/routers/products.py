@@ -14,13 +14,6 @@ db = Database()
 router = APIRouter(prefix="/products", tags=["products"])
 
 
-async def product_by_id(db: Annotated[AsyncSession, Depends(db.session_dependency)],
-                        product_id: int):
-    product = await db.scalar(select(Product).where(Product.id==product_id))
-    if not product:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
-
-
 async def category_by_product(db: Annotated[AsyncSession, Depends(db.session_dependency)],
                               product: CreateProduct):
     category = await db.scalar(select(Category).where(Category.id==product.category_id))
