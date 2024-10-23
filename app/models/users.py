@@ -1,8 +1,5 @@
-from enum import unique
-from operator import index
-
 from sqlalchemy.orm import mapped_column, Mapped
-
+from sqlalchemy.orm import relationship
 from app.backend.db import Base
 
 class User(Base):
@@ -20,3 +17,4 @@ class User(Base):
     is_supplier: Mapped[bool]= mapped_column(default=False)
     is_customer: Mapped[bool]=mapped_column(default=True)
 
+    feedback: Mapped[list['Feedback']] = relationship('Feedback', back_populates='user', lazy='selectin')

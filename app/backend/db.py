@@ -1,7 +1,8 @@
 from sqlalchemy.ext .asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, TIMESTAMP
 import os
+import datetime
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -25,3 +26,6 @@ metadata = MetaData(schema='fastapi_ecommerce')
 
 class Base(DeclarativeBase):
     metadata = metadata
+    type_annotation_map = {
+        datetime.datetime: TIMESTAMP(timezone=True),
+    }
